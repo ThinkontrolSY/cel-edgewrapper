@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"sync"
 
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/checker/decls"
@@ -19,6 +20,7 @@ type CelRegVarible struct {
 }
 
 type CelRuntime struct {
+	mu          sync.Mutex
 	celEnv      *cel.Env
 	celProgOpts cel.ProgramOption
 	declsVars   []*exprpb.Decl
@@ -142,6 +144,8 @@ func NewCelRuntime(regVariables []*CelRegVarible) (*CelRuntime, error) {
 }
 
 func (m *CelRuntime) RegProgram(key string, expr string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	ast, issues := m.celEnv.Compile(expr)
 	if issues != nil && issues.Err() != nil {
 		return issues.Err()
@@ -156,6 +160,8 @@ func (m *CelRuntime) RegProgram(key string, expr string) error {
 }
 
 func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for _, r := range regVariables {
 		m.declsVars = append(m.declsVars, decls.NewVar(r.VarName, r.VarType))
 	}
@@ -168,7 +174,11 @@ func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
 }
 
 func (m *CelRuntime) Eval(key string, vars map[string]interface{}) (ref.Val, error) {
-	prg, ok := m.prgs[key]
+	var prg cel.Program
+	var ok bool
+	m.mu.Lock()
+	prg, ok = m.prgs[key]
+	m.mu.Unlock()
 	if !ok {
 		return nil, fmt.Errorf("program %s not found", key)
 	}
