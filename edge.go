@@ -18,6 +18,17 @@ type CelRegVarible struct {
 	VarName string
 	VarType *exprpb.Type
 }
+type customLib struct {
+	envOptions []cel.EnvOption
+}
+
+func (c *customLib) CompileOptions() []cel.EnvOption {
+	return c.envOptions
+}
+
+func (customLib) ProgramOptions() []cel.ProgramOption {
+	return []cel.ProgramOption{}
+}
 
 type CelRuntime struct {
 	mu          sync.Mutex
@@ -129,8 +140,12 @@ func NewCelRuntime(regVariables []*CelRegVarible) (*CelRuntime, error) {
 	)
 
 	celEnv, err := cel.NewEnv(
-		cel.CustomTypeAdapter(&customTypeAdapter{}),
-		cel.Declarations(declsVars...),
+		cel.Lib(&customLib{
+			envOptions: []cel.EnvOption{
+				cel.CustomTypeAdapter(&customTypeAdapter{}),
+				cel.Declarations(declsVars...),
+			},
+		}),
 	)
 	if err != nil {
 		return nil, err
