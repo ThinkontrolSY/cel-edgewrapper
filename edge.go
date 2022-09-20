@@ -180,7 +180,11 @@ func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
 	for _, r := range regVariables {
 		m.declsVars = append(m.declsVars, decls.NewVar(r.VarName, r.VarType))
 	}
-	newEnv, err := m.celEnv.Extend(cel.Declarations(m.declsVars...))
+	newEnv, err := m.celEnv.Extend(cel.Lib(&customLib{
+		envOptions: []cel.EnvOption{
+			cel.Declarations(m.declsVars...),
+		},
+	}))
 	if err != nil {
 		return err
 	}
