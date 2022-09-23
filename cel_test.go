@@ -11,8 +11,8 @@ import (
 func TestCel(t *testing.T) {
 	celRt, err := NewCelRuntime([]*CelRegVarible{
 		{"name.tt", decls.String},
-		{"group", decls.Int},
-		{"age", decls.Int},
+		{"group", decls.Double},
+		{"age", decls.Uint},
 		{"bytedata", decls.Bytes},
 		{"b1", decls.Bool},
 		{"b2", decls.Bool},
@@ -28,14 +28,13 @@ func TestCel(t *testing.T) {
 	})
 
 	fields := map[string]string{
-		"test1": "name.mm == 'test'",
+		"test1": "name.mm + 'test'",
 		"test2": `size(bytedata)`,
 		"test3": `size([b1, b2, b3].filter(i, i == true))`,
 		"test4": `bytedata.bit(1)`,
 		"test5": `bytedata.to_int()`,
-		"test6": `age.cache.count(duration("4s"))`,
-		"test7": `group + age`,
-		"test8": `group * age`,
+		"test6": `age + uint(1)`,
+		"test7": `group * 10.0`,
 	}
 
 	bytedata := make([]byte, 2)
@@ -59,9 +58,11 @@ func TestCel(t *testing.T) {
 	}
 
 	for f, expr := range fields {
-		e := celRt.RegProgram(f, expr)
+		tp, e := celRt.RegProgram(f, expr)
 		if e != nil {
-			t.Fatalf("key: %s, expr: %s, error: %v", f, expr, e)
+			t.Fatalf("key: %s, type: %s, expr: %s, error: %v", f, tp, expr, e)
+		} else {
+			fmt.Printf("key: %s, type: %s, expr: %s\n", f, tp, expr)
 		}
 	}
 

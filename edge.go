@@ -158,19 +158,19 @@ func NewCelRuntime(regVariables []*CelRegVarible) (*CelRuntime, error) {
 	}, nil
 }
 
-func (m *CelRuntime) RegProgram(key string, expr string) error {
+func (m *CelRuntime) RegProgram(key string, expr string) (string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	ast, issues := m.celEnv.Compile(expr)
 	if issues != nil && issues.Err() != nil {
-		return issues.Err()
+		return "", issues.Err()
 	} else {
 		prg, err := m.celEnv.Program(ast, m.celProgOpts)
 		if err != nil {
-			return err
+			return "", err
 		}
 		m.prgs[key] = prg
-		return nil
+		return ast.OutputType().String(), nil
 	}
 }
 
