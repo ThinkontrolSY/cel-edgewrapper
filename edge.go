@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"regexp"
 	"sync"
 
 	"github.com/google/cel-go/cel"
@@ -12,6 +13,10 @@ import (
 	"github.com/google/cel-go/common/types/ref"
 	"github.com/google/cel-go/interpreter/functions"
 	exprpb "google.golang.org/genproto/googleapis/api/expr/v1alpha1"
+)
+
+const (
+	STRING_DT_REG = `^(W)?String\[(\d+)\]$`
 )
 
 type CelRegVarible struct {
@@ -206,4 +211,36 @@ func (m *CelRuntime) Eval(key string, vars map[string]interface{}) (ref.Val, err
 		return nil, err
 	}
 	return out, nil
+}
+
+func ConvertDataType(dt string) *exprpb.Type {
+	reg, _ := regexp.Compile(STRING_DT_REG)
+	match := reg.FindStringSubmatch(dt)
+	if match != nil {
+		return decls.String
+	}
+	switch dt {
+	case "Bool", "bool":
+		return decls.Bool
+	case "Byte", "Word", "DWord", "LWord", "bytes":
+		return decls.Bytes
+	case "Char":
+		return decls.String
+	case "SInt", "Int", "DInt", "LInt", "int":
+		return decls.Int
+	case "USInt", "UInt", "UDInt", "ULInt", "uint":
+		return decls.Uint
+	case "Real", "LReal", "double":
+		return decls.Double
+	case "DTL", "Date", "Date_And_Time", "LDT", "LTime_Of_Day", "Time_Of_Day":
+		return decls.Timestamp
+	case "S5Time", "Time", "LTime":
+		return decls.Duration
+	case "string", "String", "WString":
+		return decls.String
+	case "null_type":
+		return decls.Null
+	default:
+		return decls.Null
+	}
 }
