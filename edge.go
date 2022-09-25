@@ -213,34 +213,34 @@ func (m *CelRuntime) Eval(key string, vars map[string]interface{}) (ref.Val, err
 	return out, nil
 }
 
-func ConvertDataType(dt string) *exprpb.Type {
+func ConvertDataType(dt string) (*exprpb.Type, error) {
 	reg, _ := regexp.Compile(STRING_DT_REG)
 	match := reg.FindStringSubmatch(dt)
 	if match != nil {
-		return decls.String
+		return decls.String, nil
 	}
 	switch dt {
 	case "Bool", "bool":
-		return decls.Bool
+		return decls.Bool, nil
 	case "Byte", "Word", "DWord", "LWord", "bytes":
-		return decls.Bytes
+		return decls.Bytes, nil
 	case "Char":
-		return decls.String
+		return decls.String, nil
 	case "SInt", "Int", "DInt", "LInt", "int":
-		return decls.Int
+		return decls.Int, nil
 	case "USInt", "UInt", "UDInt", "ULInt", "uint":
-		return decls.Uint
+		return decls.Uint, nil
 	case "Real", "LReal", "double":
-		return decls.Double
+		return decls.Double, nil
 	case "DTL", "Date", "Date_And_Time", "LDT", "LTime_Of_Day", "Time_Of_Day":
-		return decls.Timestamp
+		return decls.Timestamp, nil
 	case "S5Time", "Time", "LTime":
-		return decls.Duration
+		return decls.Duration, nil
 	case "string", "String", "WString":
-		return decls.String
+		return decls.String, nil
 	case "null_type":
-		return decls.Null
+		return decls.Null, nil
 	default:
-		return decls.Null
+		return nil, fmt.Errorf("unsupported data type %s", dt)
 	}
 }
