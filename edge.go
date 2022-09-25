@@ -228,9 +228,9 @@ func ConvertDataType(dt string) (*exprpb.Type, error) {
 		return decls.String, nil
 	case "SInt", "Int", "DInt", "LInt", "int":
 		return decls.Int, nil
-	case "USInt", "UInt", "UDInt", "ULInt", "uint":
+	case "USInt", "UInt", "UDInt", "ULInt", "uint", "Uint":
 		return decls.Uint, nil
-	case "Real", "LReal", "double":
+	case "Real", "LReal", "double", "float":
 		return decls.Double, nil
 	case "DTL", "Date", "Date_And_Time", "LDT", "LTime_Of_Day", "Time_Of_Day":
 		return decls.Timestamp, nil
