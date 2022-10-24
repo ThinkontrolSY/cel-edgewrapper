@@ -182,6 +182,7 @@ func (m *CelRuntime) RegProgram(key string, expr string) (string, error) {
 func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.declsVars = nil
 	for _, r := range regVariables {
 		m.declsVars = append(m.declsVars, decls.NewVar(r.VarName, r.VarType))
 	}
