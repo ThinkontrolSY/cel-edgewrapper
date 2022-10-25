@@ -1,4 +1,4 @@
-module github.com/yxcloud1/cel-edgewrapper
+module github.com/ThinkontrolSY/cel-edgewrapper
 
 go 1.19
 
