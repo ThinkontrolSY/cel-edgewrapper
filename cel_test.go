@@ -1,7 +1,6 @@
 package celedgewrapper
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -33,18 +32,23 @@ func TestCel(t *testing.T) {
 		"test3": `size([b1, b2, b3].filter(i, i == true))`,
 		"test4": `bytedata.bit(1)`,
 		"test5": `bytedata.to_int()`,
-		"test6": `age + uint(1)`,
+		"test6": `age + 1u`,
 		"test7": `group * 10.0`,
 	}
 
 	bytedata := make([]byte, 2)
-	bytedata[0] = 23
+	// buf := new(bytes.Buffer)
+	// err = binary.Write(buf, binary.BigEndian, int16(25689))
+	// if err != nil {
+	// 	t.Fatal("binary.Write failed:", err)
+	// }
+	// copy(bytedata, buf.Bytes())
 	values := map[string]interface{}{
 		"name.tt":  "s",
 		"name.mm":  "test",
-		"group":    2,
+		"group":    2.0,
 		"bytedata": bytedata,
-		"age":      10,
+		"age":      uint(10),
 		"b1":       true,
 		"b2":       true,
 		"b3":       false,
@@ -62,16 +66,18 @@ func TestCel(t *testing.T) {
 		if e != nil {
 			t.Fatalf("key: %s, type: %s, expr: %s, error: %v", f, tp, expr, e)
 		} else {
-			fmt.Printf("key: %s, type: %s, expr: %s\n", f, tp, expr)
+			t.Logf("key: %s, type: %s, expr: %s\n", f, tp, expr)
 		}
 	}
+
+	t.Log("=======================================")
 
 	for f, expr := range fields {
 		v, e := celRt.Eval(f, values)
 		if e != nil {
 			t.Fatalf("key: %s, expr: %s, error: %v", f, expr, e)
 		}
-		fmt.Printf("key: %s, expr: %s, value: %v\n", f, expr, v)
+		t.Logf("key: %s, expr: %s, value: %v\n", f, expr, v)
 	}
 
 }

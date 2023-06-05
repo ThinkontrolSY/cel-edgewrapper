@@ -179,6 +179,22 @@ func (m *CelRuntime) RegProgram(key string, expr string) (string, error) {
 	}
 }
 
+func (m *CelRuntime) RegProgramType(key string, expr string) (*exprpb.Type, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	ast, issues := m.celEnv.Compile(expr)
+	if issues != nil && issues.Err() != nil {
+		return nil, issues.Err()
+	} else {
+		prg, err := m.celEnv.Program(ast, m.celProgOpts)
+		if err != nil {
+			return nil, err
+		}
+		m.prgs[key] = prg
+		return ast.ResultType(), nil
+	}
+}
+
 func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
