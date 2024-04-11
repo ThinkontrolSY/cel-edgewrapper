@@ -34,6 +34,7 @@ func TestCel(t *testing.T) {
 		"test5": `bytedata.to_int()`,
 		"test6": `age + 1u`,
 		"test7": `group * 10.0`,
+		"test8": `age.cache.count(duration("60s"))`,
 	}
 
 	bytedata := make([]byte, 2)

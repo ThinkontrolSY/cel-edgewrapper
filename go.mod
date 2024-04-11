@@ -1,15 +1,17 @@
 module github.com/ThinkontrolSY/cel-edgewrapper
 
-go 1.19
+go 1.22
 
 require (
-	github.com/google/cel-go v0.12.5
-	google.golang.org/genproto v0.0.0-20220502173005-c8bf987b8c21
+	github.com/google/cel-go v0.20.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20230803162519-f966b187b2e5
 )
 
 require (
-	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20220418222510-f25a4f6275ed // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/stoewer/go-strcase v1.2.0 // indirect
-	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc // indirect
+	golang.org/x/text v0.9.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230803162519-f966b187b2e5 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )
