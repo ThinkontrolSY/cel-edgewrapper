@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"regexp"
 	"sync"
 
@@ -46,13 +47,19 @@ type CelRuntime struct {
 func NewCelRuntime(regVariables []*CelRegVarible) (*CelRuntime, error) {
 	declsVars := []*exprpb.Decl{
 		decls.NewConst("Pi", decls.Double, &exprpb.Constant{ConstantKind: &exprpb.Constant_DoubleValue{
-			DoubleValue: 3.14159265358979323846264338327950288419716939937510582097494459}}),
+			DoubleValue: math.Pi}}),
 		decls.NewFunction("bit", decls.NewInstanceOverload("bit_in_bytes_bytes_int",
 			[]*exprpb.Type{decls.Bytes, decls.Int},
 			decls.Bool)),
 		decls.NewFunction("len", decls.NewInstanceOverload("len_cache",
 			[]*exprpb.Type{decls.NewObjectType("CacheType")},
 			decls.Int)),
+		decls.NewFunction("rising", decls.NewInstanceOverload("rising_cache",
+			[]*exprpb.Type{decls.NewObjectType("CacheType")},
+			decls.Bool)),
+		decls.NewFunction("falling", decls.NewInstanceOverload("falling_cache",
+			[]*exprpb.Type{decls.NewObjectType("CacheType")},
+			decls.Bool)),
 		decls.NewFunction("count", decls.NewInstanceOverload("count_cache",
 			[]*exprpb.Type{decls.NewObjectType("CacheType"), decls.Duration},
 			decls.Int)),

@@ -27,14 +27,17 @@ func TestCel(t *testing.T) {
 	})
 
 	fields := map[string]string{
-		"test1": "name.mm + 'test'",
-		"test2": `size(bytedata)`,
-		"test3": `size([b1, b2, b3].filter(i, i == true))`,
-		"test4": `bytedata.bit(1)`,
-		"test5": `bytedata.to_int()`,
-		"test6": `age + 1u`,
-		"test7": `group * 10.0`,
-		"test8": `age.cache.count(duration("60s"))`,
+		"test1":  "name.mm + 'test'",
+		"test2":  `size(bytedata)`,
+		"test3":  `size([b1, b2, b3].filter(i, i == true))`,
+		"test4":  `bytedata.bit(1)`,
+		"test5":  `bytedata.to_int()`,
+		"test6":  `age + 1u`,
+		"test7":  `group * 10.0`,
+		"test8":  `age.cache.count(duration("60s"))`,
+		"test9":  `age.cache.len()`,
+		"test10": `age.cache.rising()`,
+		"test11": `age.cache.falling()`,
 	}
 
 	bytedata := make([]byte, 2)
@@ -58,7 +61,7 @@ func TestCel(t *testing.T) {
 			{time.Now().Add(-3 * time.Second), 3},
 			{time.Now().Add(-4 * time.Second), 4},
 			{time.Now().Add(-time.Second), 6},
-			{time.Now(), 12},
+			{time.Now(), 0},
 		}),
 	}
 

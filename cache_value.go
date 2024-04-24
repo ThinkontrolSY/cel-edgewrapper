@@ -31,6 +31,82 @@ func (c *Cache) Len() int {
 	return len(*c)
 }
 
+func (c *Cache) Rising() bool {
+	if len(*c) < 2 {
+		return false
+	}
+	switch v := (*c)[len(*c)-1].Var.(type) {
+	case int:
+		return v > (*c)[len(*c)-2].Var.(int)
+	case int8:
+		return v > (*c)[len(*c)-2].Var.(int8)
+	case int16:
+		return v > (*c)[len(*c)-2].Var.(int16)
+	case int32:
+		return v > (*c)[len(*c)-2].Var.(int32)
+	case int64:
+		return v > (*c)[len(*c)-2].Var.(int64)
+	case uint:
+		return v > (*c)[len(*c)-2].Var.(uint)
+	case uint8:
+		return v > (*c)[len(*c)-2].Var.(uint8)
+	case uint16:
+		return v > (*c)[len(*c)-2].Var.(uint16)
+	case uint32:
+		return v > (*c)[len(*c)-2].Var.(uint32)
+	case uint64:
+		return v > (*c)[len(*c)-2].Var.(uint64)
+	case float32:
+		return v > (*c)[len(*c)-2].Var.(float32)
+	case float64:
+		return v > (*c)[len(*c)-2].Var.(float64)
+	case bool:
+		return v && !(*c)[len(*c)-2].Var.(bool)
+	case string:
+		return v > (*c)[len(*c)-2].Var.(string)
+	default:
+		return false
+	}
+}
+
+func (c *Cache) Falling() bool {
+	if len(*c) < 2 {
+		return false
+	}
+	switch v := (*c)[len(*c)-1].Var.(type) {
+	case int:
+		return v < (*c)[len(*c)-2].Var.(int)
+	case int8:
+		return v < (*c)[len(*c)-2].Var.(int8)
+	case int16:
+		return v < (*c)[len(*c)-2].Var.(int16)
+	case int32:
+		return v < (*c)[len(*c)-2].Var.(int32)
+	case int64:
+		return v < (*c)[len(*c)-2].Var.(int64)
+	case uint:
+		return v < (*c)[len(*c)-2].Var.(uint)
+	case uint8:
+		return v < (*c)[len(*c)-2].Var.(uint8)
+	case uint16:
+		return v < (*c)[len(*c)-2].Var.(uint16)
+	case uint32:
+		return v < (*c)[len(*c)-2].Var.(uint32)
+	case uint64:
+		return v < (*c)[len(*c)-2].Var.(uint64)
+	case float32:
+		return v < (*c)[len(*c)-2].Var.(float32)
+	case float64:
+		return v < (*c)[len(*c)-2].Var.(float64)
+	case bool:
+		return !v && (*c)[len(*c)-2].Var.(bool)
+	case string:
+		return v < (*c)[len(*c)-2].Var.(string)
+	default:
+		return false
+	}
+}
+
 // the CEL type to represent Test
 var CacheType = types.NewTypeValue("CacheType", traits.ReceiverType)
 
@@ -64,9 +140,12 @@ func (t Cache) Value() interface{} {
 }
 
 func (c Cache) Receive(function string, overload string, args []ref.Val) ref.Val {
-
 	if function == "len" {
 		return types.Int(c.Len())
+	} else if function == "rising" {
+		return types.Bool(c.Rising())
+	} else if function == "falling" {
+		return types.Bool(c.Falling())
 	} else if function == "count" && len(args) == 1 {
 		if du, dok := args[0].(types.Duration); dok {
 			count := 0
