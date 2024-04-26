@@ -31,6 +31,48 @@ func (c *Cache) Len() int {
 	return len(*c)
 }
 
+func (c *Cache) Diff() float64 {
+	if len(*c) < 2 {
+		return 0
+	}
+	switch v := (*c)[len(*c)-1].Var.(type) {
+	case int:
+		return float64(v - (*c)[len(*c)-2].Var.(int))
+	case int8:
+		return float64(v - (*c)[len(*c)-2].Var.(int8))
+	case int16:
+		return float64(v - (*c)[len(*c)-2].Var.(int16))
+	case int32:
+		return float64(v - (*c)[len(*c)-2].Var.(int32))
+	case int64:
+		return float64(v - (*c)[len(*c)-2].Var.(int64))
+	case uint:
+		return float64(v - (*c)[len(*c)-2].Var.(uint))
+	case uint8:
+		return float64(v - (*c)[len(*c)-2].Var.(uint8))
+	case uint16:
+		return float64(v - (*c)[len(*c)-2].Var.(uint16))
+	case uint32:
+		return float64(v - (*c)[len(*c)-2].Var.(uint32))
+	case uint64:
+		return float64(v - (*c)[len(*c)-2].Var.(uint64))
+	case float32:
+		return float64(v - (*c)[len(*c)-2].Var.(float32))
+	case float64:
+		return v - (*c)[len(*c)-2].Var.(float64)
+	case bool:
+		if v && !(*c)[len(*c)-2].Var.(bool) {
+			return 1
+		}
+		if !v && (*c)[len(*c)-2].Var.(bool) {
+			return -1
+		}
+		return 0
+	default:
+		return 0
+	}
+}
+
 func (c *Cache) Rising() bool {
 	if len(*c) < 2 {
 		return false
@@ -142,6 +184,8 @@ func (t Cache) Value() interface{} {
 func (c Cache) Receive(function string, overload string, args []ref.Val) ref.Val {
 	if function == "len" {
 		return types.Int(c.Len())
+	} else if function == "diff" {
+		return types.Double(c.Diff())
 	} else if function == "rising" {
 		return types.Bool(c.Rising())
 	} else if function == "falling" {

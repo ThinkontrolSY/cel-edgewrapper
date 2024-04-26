@@ -38,6 +38,7 @@ func TestCel(t *testing.T) {
 		"test9":  `age.cache.len()`,
 		"test10": `age.cache.rising()`,
 		"test11": `age.cache.falling()`,
+		"test12": `age.cache.diff()`,
 	}
 
 	bytedata := make([]byte, 2)
@@ -61,7 +62,7 @@ func TestCel(t *testing.T) {
 			{time.Now().Add(-3 * time.Second), 3},
 			{time.Now().Add(-4 * time.Second), 4},
 			{time.Now().Add(-time.Second), 6},
-			{time.Now(), 0},
+			{time.Now(), 5},
 		}),
 	}
 
