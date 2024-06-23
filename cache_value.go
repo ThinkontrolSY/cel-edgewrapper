@@ -31,122 +31,142 @@ func (c *Cache) Len() int {
 	return len(*c)
 }
 
-func (c *Cache) Diff() float64 {
-	if len(*c) < 2 {
-		return 0
-	}
-	switch v := (*c)[len(*c)-1].Var.(type) {
-	case int:
-		return float64(v - (*c)[len(*c)-2].Var.(int))
-	case int8:
-		return float64(v - (*c)[len(*c)-2].Var.(int8))
-	case int16:
-		return float64(v - (*c)[len(*c)-2].Var.(int16))
-	case int32:
-		return float64(v - (*c)[len(*c)-2].Var.(int32))
-	case int64:
-		return float64(v - (*c)[len(*c)-2].Var.(int64))
-	case uint:
-		return float64(v - (*c)[len(*c)-2].Var.(uint))
-	case uint8:
-		return float64(v - (*c)[len(*c)-2].Var.(uint8))
-	case uint16:
-		return float64(v - (*c)[len(*c)-2].Var.(uint16))
-	case uint32:
-		return float64(v - (*c)[len(*c)-2].Var.(uint32))
-	case uint64:
-		return float64(v - (*c)[len(*c)-2].Var.(uint64))
-	case float32:
-		return float64(v - (*c)[len(*c)-2].Var.(float32))
-	case float64:
-		return v - (*c)[len(*c)-2].Var.(float64)
-	case bool:
-		if v && !(*c)[len(*c)-2].Var.(bool) {
-			return 1
-		}
-		if !v && (*c)[len(*c)-2].Var.(bool) {
-			return -1
-		}
-		return 0
-	default:
-		return 0
-	}
-}
-
 func (c *Cache) Rising() bool {
 	if len(*c) < 2 {
 		return false
 	}
-	switch v := (*c)[len(*c)-1].Var.(type) {
-	case int:
-		return v > (*c)[len(*c)-2].Var.(int)
-	case int8:
-		return v > (*c)[len(*c)-2].Var.(int8)
-	case int16:
-		return v > (*c)[len(*c)-2].Var.(int16)
-	case int32:
-		return v > (*c)[len(*c)-2].Var.(int32)
-	case int64:
-		return v > (*c)[len(*c)-2].Var.(int64)
-	case uint:
-		return v > (*c)[len(*c)-2].Var.(uint)
-	case uint8:
-		return v > (*c)[len(*c)-2].Var.(uint8)
-	case uint16:
-		return v > (*c)[len(*c)-2].Var.(uint16)
-	case uint32:
-		return v > (*c)[len(*c)-2].Var.(uint32)
-	case uint64:
-		return v > (*c)[len(*c)-2].Var.(uint64)
-	case float32:
-		return v > (*c)[len(*c)-2].Var.(float32)
-	case float64:
-		return v > (*c)[len(*c)-2].Var.(float64)
-	case bool:
-		return v && !(*c)[len(*c)-2].Var.(bool)
-	case string:
-		return v > (*c)[len(*c)-2].Var.(string)
-	default:
-		return false
+	for i := 0; i < len(*c)-1; i++ {
+		currentVar := (*c)[i].Var
+		nextVar := (*c)[i+1].Var
+		switch v := currentVar.(type) {
+		case int:
+			if v < nextVar.(int) {
+				return true
+			}
+		case int8:
+			if v < nextVar.(int8) {
+				return true
+			}
+		case int16:
+			if v < nextVar.(int16) {
+				return true
+			}
+		case int32:
+			if v < nextVar.(int32) {
+				return true
+			}
+		case int64:
+			if v < nextVar.(int64) {
+				return true
+			}
+		case uint:
+			if v < nextVar.(uint) {
+				return true
+			}
+		case uint8:
+			if v < nextVar.(uint8) {
+				return true
+			}
+		case uint16:
+			if v < nextVar.(uint16) {
+				return true
+			}
+		case uint32:
+			if v < nextVar.(uint32) {
+				return true
+			}
+		case uint64:
+			if v < nextVar.(uint64) {
+				return true
+			}
+		case float32:
+			if v < nextVar.(float32) {
+				return true
+			}
+		case float64:
+			if v < nextVar.(float64) {
+				return true
+			}
+		case bool:
+			return !v && nextVar.(bool)
+		case string:
+			if v < nextVar.(string) {
+				return true
+			}
+		default:
+			continue
+		}
 	}
+	return false
 }
 
 func (c *Cache) Falling() bool {
 	if len(*c) < 2 {
 		return false
 	}
-	switch v := (*c)[len(*c)-1].Var.(type) {
-	case int:
-		return v < (*c)[len(*c)-2].Var.(int)
-	case int8:
-		return v < (*c)[len(*c)-2].Var.(int8)
-	case int16:
-		return v < (*c)[len(*c)-2].Var.(int16)
-	case int32:
-		return v < (*c)[len(*c)-2].Var.(int32)
-	case int64:
-		return v < (*c)[len(*c)-2].Var.(int64)
-	case uint:
-		return v < (*c)[len(*c)-2].Var.(uint)
-	case uint8:
-		return v < (*c)[len(*c)-2].Var.(uint8)
-	case uint16:
-		return v < (*c)[len(*c)-2].Var.(uint16)
-	case uint32:
-		return v < (*c)[len(*c)-2].Var.(uint32)
-	case uint64:
-		return v < (*c)[len(*c)-2].Var.(uint64)
-	case float32:
-		return v < (*c)[len(*c)-2].Var.(float32)
-	case float64:
-		return v < (*c)[len(*c)-2].Var.(float64)
-	case bool:
-		return !v && (*c)[len(*c)-2].Var.(bool)
-	case string:
-		return v < (*c)[len(*c)-2].Var.(string)
-	default:
-		return false
+	for i := 0; i < len(*c)-1; i++ {
+		currentVar := (*c)[i].Var
+		nextVar := (*c)[i+1].Var
+		switch v := currentVar.(type) {
+		case int:
+			if v > nextVar.(int) {
+				return true
+			}
+		case int8:
+			if v > nextVar.(int8) {
+				return true
+			}
+		case int16:
+			if v > nextVar.(int16) {
+				return true
+			}
+		case int32:
+			if v > nextVar.(int32) {
+				return true
+			}
+		case int64:
+			if v > nextVar.(int64) {
+				return true
+			}
+		case uint:
+			if v > nextVar.(uint) {
+				return true
+			}
+		case uint8:
+			if v > nextVar.(uint8) {
+				return true
+			}
+		case uint16:
+			if v > nextVar.(uint16) {
+				return true
+			}
+		case uint32:
+			if v > nextVar.(uint32) {
+				return true
+			}
+		case uint64:
+			if v > nextVar.(uint64) {
+				return true
+			}
+		case float32:
+			if v > nextVar.(float32) {
+				return true
+			}
+		case float64:
+			if v > nextVar.(float64) {
+				return true
+			}
+		case bool:
+			return v && !nextVar.(bool)
+		case string:
+			if v > nextVar.(string) {
+				return true
+			}
+		default:
+			continue
+		}
 	}
+	return false
 }
 
 // the CEL type to represent Test
@@ -184,8 +204,6 @@ func (t Cache) Value() interface{} {
 func (c Cache) Receive(function string, overload string, args []ref.Val) ref.Val {
 	if function == "len" {
 		return types.Int(c.Len())
-	} else if function == "diff" {
-		return types.Double(c.Diff())
 	} else if function == "rising" {
 		return types.Bool(c.Rising())
 	} else if function == "falling" {
