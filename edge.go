@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"reflect"
 	"regexp"
 	"sync"
 
@@ -268,23 +267,4 @@ func ConvertDataType(dt string) (*exprpb.Type, error) {
 	default:
 		return nil, fmt.Errorf("unsupported data type %s", dt)
 	}
-}
-
-func Compare(i1, i2 interface{}) bool {
-	t1 := reflect.TypeOf(i1)
-	t2 := reflect.TypeOf(i2)
-	if t1 == t2 {
-		b1, ok1 := i1.([]byte)
-		b2, ok2 := i2.([]byte)
-		if ok1 && ok2 {
-			return bytes.Equal(b1, b2)
-		}
-		u1, ok1 := i1.([]uint8)
-		u2, ok2 := i2.([]uint8)
-		if ok1 && ok2 {
-			return bytes.Equal(u1, u2)
-		}
-		return i1 == i2
-	}
-	return false
 }

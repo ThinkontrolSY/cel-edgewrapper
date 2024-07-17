@@ -47,22 +47,65 @@ func TestCel(t *testing.T) {
 	// 	t.Fatal("binary.Write failed:", err)
 	// }
 	// copy(bytedata, buf.Bytes())
+	ageCache := NewCache(1)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(3, 5*time.Second)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(4, 5*time.Second)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(6, 5*time.Second)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(1, 5*time.Second)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(1, 5*time.Second)
+	time.Sleep(1 * time.Second)
+	ageCache.Add(1, 5*time.Second)
+
+	t.Log(ageCache.Len())
+
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(2, 50*time.Second)
+	t.Log(ageCache.Len())
+
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(1, 50*time.Second)
+	t.Log(ageCache.Len())
+
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(3, 50*time.Second)
+	t.Log(ageCache.Len())
+
+	ageCache.Lock()
+
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(1, 50*time.Second)
+	t.Log(ageCache.Len())
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(2, 50*time.Second)
+	t.Log(ageCache.Len())
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(3, 50*time.Second)
+	t.Log(ageCache.Len())
+
+	ageCache.Unlock()
+
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(4, 50*time.Second)
+	t.Log(ageCache.Len())
+	time.Sleep(10 * time.Millisecond)
+	ageCache.Add(4, 50*time.Second)
+	t.Log(ageCache.Len())
+
 	values := map[string]interface{}{
-		"name.tt":  "s",
-		"name.mm":  "test",
-		"group":    2.0,
-		"bytedata": bytedata,
-		"age":      uint(10),
-		"b1":       true,
-		"b2":       true,
-		"b3":       false,
-		"age.cache": Cache([]CacheValue{
-			{time.Now().Add(-2 * time.Second), 1},
-			{time.Now().Add(-3 * time.Second), 3},
-			{time.Now().Add(-4 * time.Second), 4},
-			{time.Now().Add(-time.Second), 6},
-			{time.Now(), 5},
-		}),
+		"name.tt":   "s",
+		"name.mm":   "test",
+		"group":     2.0,
+		"bytedata":  bytedata,
+		"age":       uint(10),
+		"b1":        true,
+		"b2":        true,
+		"b3":        false,
+		"age.cache": ageCache,
 	}
 
 	for f, expr := range fields {

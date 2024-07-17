@@ -1,7 +1,9 @@
 package celedgewrapper
 
 import (
+	"log"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/google/cel-go/common/types"
@@ -14,177 +16,168 @@ type CacheValue struct {
 	Var       interface{}
 }
 
-type Cache []CacheValue
+// type Cache []CacheValue
+type Cache struct {
+	data   []CacheValue
+	mutex  sync.RWMutex
+	locked bool
+}
 
-func (c *Cache) Count(du time.Duration) int {
-	count := 0
+func NewCache(v interface{}) *Cache {
+	return &Cache{
+		data: []CacheValue{
+			{time.Now(), v},
+		},
+	}
+}
+
+func (c *Cache) Add(v interface{}, maxDur time.Duration) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if c.locked {
+		log.Println("Add operation is locked")
+		return
+	}
+
 	now := time.Now()
-	for _, v := range *c {
-		if v.Timestamp.After(now.Add(-du)) {
-			count++
+	validTime := now.Add(-maxDur)
+	newCache := make([]CacheValue, 0)
+	for _, cv := range c.data {
+		if cv.Timestamp.After(validTime) {
+			newCache = append(newCache, cv)
 		}
 	}
-	return count
+	c.data = newCache
+
+	if len(c.data) > 0 {
+		lastIndex := len(c.data) - 1
+		lastValue := c.data[lastIndex].Var
+
+		if reflect.TypeOf(lastValue) == reflect.TypeOf(v) && reflect.DeepEqual(lastValue, v) {
+			c.data[lastIndex] = CacheValue{
+				Timestamp: now,
+				Var:       v,
+			}
+			return
+		}
+	}
+	c.data = append(c.data, CacheValue{
+		Timestamp: now,
+		Var:       v,
+	})
+}
+
+// Clear 方法
+func (c *Cache) Clear() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.data = make([]CacheValue, 0)
+}
+
+// Lock 和 Unlock 方法
+func (c *Cache) Lock() {
+	c.mutex.Lock()
+	c.locked = true
+	c.mutex.Unlock()
+}
+
+func (c *Cache) Unlock() {
+	c.mutex.Lock()
+	c.locked = false
+	c.mutex.Unlock()
 }
 
 func (c *Cache) Len() int {
-	return len(*c)
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return len(c.data)
 }
 
+// Rising 方法
 func (c *Cache) Rising() bool {
-	if len(*c) < 2 {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if len(c.data) < 2 {
 		return false
 	}
-	for i := 0; i < len(*c)-1; i++ {
-		currentVar := (*c)[i].Var
-		nextVar := (*c)[i+1].Var
-		switch v := currentVar.(type) {
-		case int:
-			if v < nextVar.(int) {
-				return true
-			}
-		case int8:
-			if v < nextVar.(int8) {
-				return true
-			}
-		case int16:
-			if v < nextVar.(int16) {
-				return true
-			}
-		case int32:
-			if v < nextVar.(int32) {
-				return true
-			}
-		case int64:
-			if v < nextVar.(int64) {
-				return true
-			}
-		case uint:
-			if v < nextVar.(uint) {
-				return true
-			}
-		case uint8:
-			if v < nextVar.(uint8) {
-				return true
-			}
-		case uint16:
-			if v < nextVar.(uint16) {
-				return true
-			}
-		case uint32:
-			if v < nextVar.(uint32) {
-				return true
-			}
-		case uint64:
-			if v < nextVar.(uint64) {
-				return true
-			}
-		case float32:
-			if v < nextVar.(float32) {
-				return true
-			}
-		case float64:
-			if v < nextVar.(float64) {
-				return true
-			}
-		case bool:
-			return !v && nextVar.(bool)
-		case string:
-			if v < nextVar.(string) {
-				return true
-			}
-		default:
-			continue
-		}
+
+	lastIndex := len(c.data) - 1
+	value1 := c.data[lastIndex-1].Var
+	value2 := c.data[lastIndex].Var
+
+	if reflect.TypeOf(value1) != reflect.TypeOf(value2) {
+		return false
 	}
-	return false
+
+	switch v1 := value1.(type) {
+	case string:
+		v2 := value2.(string)
+		return v1 < v2
+	case int, int8, int16, int32, int64:
+		return reflect.ValueOf(value1).Int() < reflect.ValueOf(value2).Int()
+	case uint, uint8, uint16, uint32, uint64:
+		return reflect.ValueOf(value1).Uint() < reflect.ValueOf(value2).Uint()
+	case float32, float64:
+		return reflect.ValueOf(value1).Float() < reflect.ValueOf(value2).Float()
+	case bool:
+		return v1 && !value2.(bool)
+	default:
+		return false
+	}
 }
 
+// Falling 方法
 func (c *Cache) Falling() bool {
-	if len(*c) < 2 {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if len(c.data) < 2 {
 		return false
 	}
-	for i := 0; i < len(*c)-1; i++ {
-		currentVar := (*c)[i].Var
-		nextVar := (*c)[i+1].Var
-		switch v := currentVar.(type) {
-		case int:
-			if v > nextVar.(int) {
-				return true
-			}
-		case int8:
-			if v > nextVar.(int8) {
-				return true
-			}
-		case int16:
-			if v > nextVar.(int16) {
-				return true
-			}
-		case int32:
-			if v > nextVar.(int32) {
-				return true
-			}
-		case int64:
-			if v > nextVar.(int64) {
-				return true
-			}
-		case uint:
-			if v > nextVar.(uint) {
-				return true
-			}
-		case uint8:
-			if v > nextVar.(uint8) {
-				return true
-			}
-		case uint16:
-			if v > nextVar.(uint16) {
-				return true
-			}
-		case uint32:
-			if v > nextVar.(uint32) {
-				return true
-			}
-		case uint64:
-			if v > nextVar.(uint64) {
-				return true
-			}
-		case float32:
-			if v > nextVar.(float32) {
-				return true
-			}
-		case float64:
-			if v > nextVar.(float64) {
-				return true
-			}
-		case bool:
-			return v && !nextVar.(bool)
-		case string:
-			if v > nextVar.(string) {
-				return true
-			}
-		default:
-			continue
-		}
+
+	lastIndex := len(c.data) - 1
+	value1 := c.data[lastIndex-1].Var
+	value2 := c.data[lastIndex].Var
+
+	if reflect.TypeOf(value1) != reflect.TypeOf(value2) {
+		return false
 	}
-	return false
+
+	switch v1 := value1.(type) {
+	case string:
+		v2 := value2.(string)
+		return v1 > v2
+	case int, int8, int16, int32, int64:
+		return reflect.ValueOf(value1).Int() > reflect.ValueOf(value2).Int()
+	case uint, uint8, uint16, uint32, uint64:
+		return reflect.ValueOf(value1).Uint() > reflect.ValueOf(value2).Uint()
+	case float32, float64:
+		return reflect.ValueOf(value1).Float() > reflect.ValueOf(value2).Float()
+	case bool:
+		return !v1 && value2.(bool)
+	default:
+		return false
+	}
 }
 
 // the CEL type to represent Test
 var CacheType = types.NewTypeValue("CacheType", traits.ReceiverType)
 
-func (t Cache) ConvertToNative(typeDesc reflect.Type) (interface{}, error) {
+func (t *Cache) ConvertToNative(typeDesc reflect.Type) (interface{}, error) {
 	panic("not required")
 }
 
-func (t Cache) ConvertToType(typeVal ref.Type) ref.Val {
+func (t *Cache) ConvertToType(typeVal ref.Type) ref.Val {
 	panic("not required")
 }
 
-func (c Cache) Equal(other ref.Val) ref.Val {
-	o, ok := other.Value().(Cache)
+func (c *Cache) Equal(other ref.Val) ref.Val {
+	o, ok := other.Value().(*Cache)
 	if ok {
-		if len(o) == len(c) {
-			return types.Bool(true)
+		if len(o.data) == len(c.data) {
+			return types.Bool(reflect.DeepEqual(o.data, c.data))
 		} else {
 			return types.Bool(false)
 		}
@@ -193,15 +186,15 @@ func (c Cache) Equal(other ref.Val) ref.Val {
 	}
 }
 
-func (t Cache) Type() ref.Type {
+func (t *Cache) Type() ref.Type {
 	return CacheType
 }
 
-func (t Cache) Value() interface{} {
+func (t *Cache) Value() interface{} {
 	return t
 }
 
-func (c Cache) Receive(function string, overload string, args []ref.Val) ref.Val {
+func (c *Cache) Receive(function string, overload string, args []ref.Val) ref.Val {
 	if function == "len" {
 		return types.Int(c.Len())
 	} else if function == "rising" {
@@ -212,7 +205,7 @@ func (c Cache) Receive(function string, overload string, args []ref.Val) ref.Val
 		if du, dok := args[0].(types.Duration); dok {
 			count := 0
 			now := time.Now()
-			for _, v := range c {
+			for _, v := range c.data {
 				if v.Timestamp.After(now.Add(-du.Duration)) {
 					count++
 				}
@@ -236,7 +229,7 @@ type customTypeAdapter struct {
 }
 
 func (customTypeAdapter) NativeToValue(value interface{}) ref.Val {
-	val, ok := value.(Cache)
+	val, ok := value.(*Cache)
 	if ok {
 		return val
 	} else {
