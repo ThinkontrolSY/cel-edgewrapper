@@ -176,11 +176,7 @@ func (t *Cache) ConvertToType(typeVal ref.Type) ref.Val {
 func (c *Cache) Equal(other ref.Val) ref.Val {
 	o, ok := other.Value().(*Cache)
 	if ok {
-		if len(o.data) == len(c.data) {
-			return types.Bool(reflect.DeepEqual(o.data, c.data))
-		} else {
-			return types.Bool(false)
-		}
+		return types.Bool(reflect.DeepEqual(o.data, c.data))
 	} else {
 		return types.ValOrErr(other, "%v is not of type Test", other)
 	}
