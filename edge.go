@@ -262,6 +262,18 @@ func ConvertDataType(dt string) (*exprpb.Type, error) {
 		return decls.Duration, nil
 	case "string", "String", "WString":
 		return decls.String, nil
+	case "SP":
+		return decls.Bool, nil
+	case "DP":
+		return decls.Bytes, nil
+	case "ST":
+		return decls.Bytes, nil
+	case "BO":
+		return decls.Uint, nil
+	case "ME":
+		return decls.Double, nil
+	case "SC":
+		return decls.Int, nil
 	case "null_type":
 		return decls.Null, nil
 	default:
