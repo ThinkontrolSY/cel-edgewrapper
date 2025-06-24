@@ -8,7 +8,7 @@ import (
 )
 
 func TestCel(t *testing.T) {
-	celRt, err := NewCelRuntime([]*CelRegVarible{
+	celRt, err := NewCelRuntime([]*CelRegVariable{
 		{"name.tt", decls.String},
 		{"group", decls.Double},
 		{"age", decls.Uint},
@@ -22,7 +22,7 @@ func TestCel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	celRt.UpdateEnv([]*CelRegVarible{
+	celRt.UpdateEnv([]*CelRegVariable{
 		{"name.mm", decls.String},
 	})
 

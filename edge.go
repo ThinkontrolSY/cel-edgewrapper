@@ -20,7 +20,7 @@ const (
 	STRING_DT_REG = `^(W)?String\[(\d+)\]$`
 )
 
-type CelRegVarible struct {
+type CelRegVariable struct {
 	VarName string
 	VarType *exprpb.Type
 }
@@ -44,7 +44,7 @@ type CelRuntime struct {
 	prgs        map[string]cel.Program
 }
 
-func NewCelRuntime(regVariables []*CelRegVarible) (*CelRuntime, error) {
+func NewCelRuntime(regVariables []*CelRegVariable) (*CelRuntime, error) {
 	declsVars := []*exprpb.Decl{
 		decls.NewConst("Pi", decls.Double, &exprpb.Constant{ConstantKind: &exprpb.Constant_DoubleValue{
 			DoubleValue: math.Pi}}),
@@ -202,7 +202,7 @@ func (m *CelRuntime) RegProgramType(key string, expr string) (*exprpb.Type, erro
 	}
 }
 
-func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVarible) error {
+func (m *CelRuntime) UpdateEnv(regVariables []*CelRegVariable) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.declsVars = nil
