@@ -1,7 +1,6 @@
 package celedgewrapper
 
 import (
-	"fmt"
 	"log"
 	"reflect"
 	"sync"
@@ -111,7 +110,6 @@ func (c *Cache) Rising() bool {
 	defer c.mutex.RUnlock()
 
 	if len(c.data) < 2 {
-		fmt.Printf("length of cache is %v", len(c.data))
 		return false
 	}
 
@@ -146,7 +144,6 @@ func (c *Cache) Falling() bool {
 	defer c.mutex.RUnlock()
 
 	if len(c.data) < 2 {
-		fmt.Printf("length of cache is %v", len(c.data))
 		return false
 	}
 
