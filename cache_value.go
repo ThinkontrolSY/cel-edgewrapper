@@ -1,6 +1,7 @@
 package celedgewrapper
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
@@ -42,6 +43,8 @@ func (c *Cache) Add(v interface{}, maxDur time.Duration) {
 
 	now := time.Now()
 
+	fmt.Printf("len: %v\n", len(c.data))
+
 	cutoff := now.Add(-maxDur)
 	discardCount := 0
 	for _, v := range c.data {
@@ -76,6 +79,7 @@ func (c *Cache) Add(v interface{}, maxDur time.Duration) {
 		Timestamp: now,
 		Var:       v,
 	})
+	fmt.Printf("len: %v\n", len(c.data))
 }
 
 // Clear 方法
