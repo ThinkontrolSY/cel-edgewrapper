@@ -42,14 +42,24 @@ func (c *Cache) Add(v interface{}, maxDur time.Duration) {
 	}
 
 	now := time.Now()
-	validTime := now.Add(-maxDur)
-	newCache := make([]CacheValue, 0)
-	for _, cv := range c.data {
-		if cv.Timestamp.After(validTime) {
-			newCache = append(newCache, cv)
+
+	cutoff := now.Add(-maxDur)
+	discardCount := 0
+	for _, v := range c.data {
+		if v.Timestamp.Before(cutoff) {
+			discardCount++
+		} else {
+			break
 		}
 	}
-	c.data = newCache
+
+	if maxDiscard := len(c.data) - 2; discardCount > maxDiscard {
+		discardCount = maxDiscard
+	}
+
+	if discardCount > 0 {
+		c.data = c.data[discardCount:]
+	}
 
 	if len(c.data) > 0 {
 		lastIndex := len(c.data) - 1
