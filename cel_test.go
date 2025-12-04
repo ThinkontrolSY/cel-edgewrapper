@@ -128,3 +128,29 @@ func TestCel(t *testing.T) {
 	}
 
 }
+
+type Point[T int64 | float64 | bool | string] struct {
+	Value     T
+	Timestamp *time.Time
+}
+
+type Caches[T int64 | float64 | bool | string] struct {
+	points      []*Point[T]
+	maxDuration time.Duration
+}
+
+func PushPoint[T int64 | float64 | bool | string](caches *Caches[T], point *Point[T]) {
+	caches.points = append(caches.points, point)
+	// if oldest point is older than maxDuration, remove it
+	if len(caches.points) > 0 && caches.maxDuration > 0 {
+		oldestTime := caches.points[0].Timestamp
+		for _, p := range caches.points {
+			if p.Timestamp.Before(*oldestTime) {
+				oldestTime = p.Timestamp
+			}
+		}
+		if time.Since(*oldestTime) > caches.maxDuration {
+			caches.points = caches.points[1:]
+		}
+	}
+}
